@@ -92,7 +92,7 @@ kubectl scale deployment.apps/inflate-spot-500mcpu --replicas 7
 kubectl get node_claim
 kubectl get nodeclaims {node_claim} -o yaml | grep ^status -A10
 
-## create a new deployment, that cannot be disrupted by karpenter and scale it
+## create a new deployment, that cannot be disrupted by NAP / karpenter and scale it
 ## check the annotation
 
 kubectl apply -f demo-NAP/inflate-spot-250mcpu-no-disrupt.yaml
@@ -108,7 +108,7 @@ kubectl scale deployment.apps/inflate-spot-500mcpu --replicas 6
 
 kubectl get events -A --field-selector source=karpenter --sort-by='.metadata.creationTimestamp'
 
-## clean up the workload and karpenter will delete the nodes
+## clean up the workload and NAP / karpenter will delete the nodes
 
 # kubectl apply -f demo-NAP/inflate-spot-250mCPU.yaml
 # kubectl apply -f demo-NAP/inflate-spot-500mCPU.yaml
