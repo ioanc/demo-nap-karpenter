@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: inflate-default-1000mcpu
+  namespace: default
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 0
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: inflate-default-1000mcpu
+  template:
+    metadata:
+      labels:
+        app: inflate-default-1000mcpu
+      annotations:
+        # karpenter.sh/do-not-disrupt: "true"
+    spec:
+      tolerations:
+      - key: "spot"
+        operator: "Exists"
+        effect: "NoSchedule"
+      containers:
+      - image: mcr.microsoft.com/oss/kubernetes/pause:3.6
+        imagePullPolicy: IfNotPresent
+        name: inflate-default-1000mcpu
+        resources:
+          requests:
+            cpu: 1000m
+            memory: 256M
+      terminationGracePeriodSeconds: 30

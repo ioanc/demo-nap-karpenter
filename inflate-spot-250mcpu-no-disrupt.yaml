@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: inflate-spot-250mcpu-no-disrupt
+  namespace: default
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 0
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: inflate-spot-250mcpu-no-disrupt
+  template:
+    metadata:
+      labels:
+        app: inflate-spot-250mcpu-no-disrupt
+      annotations:
+        karpenter.sh/do-not-disrupt: "true"
+    spec:
+      tolerations:
+      - key: "spot"
+        operator: "Exists"
+        effect: "NoSchedule"
+      containers:
+      - image: mcr.microsoft.com/oss/kubernetes/pause:3.6
+        imagePullPolicy: IfNotPresent
+        name: inflate-spot-250mcpu-no-disrupt
+        resources:
+          requests:
+            cpu: 256m
+            memory: 256M
+      terminationGracePeriodSeconds: 30

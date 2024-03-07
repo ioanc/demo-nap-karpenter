@@ -1,0 +1,9 @@
+apiVersion: karpenter.azure.com/v1alpha2
+kind: AKSNodeClass
+metadata:
+  annotations:
+    kubernetes.io/description: General purpose AKSNodeClass for running Ubuntu2204 nodes
+  name: default
+spec:
+  imageFamily: Ubuntu2204
+  osDiskSizeGB: 128

@@ -1,0 +1,51 @@
+kubectl get nodes
+
+kubectl get crd | grep karpenter
+
+kubectl get aksnodeclasses
+
+kubectl get nodepools
+
+kubectl get nodeclaims
+
+kubectl get events -A --field-selector source=karpenter --sort-by='.metadata.creationTimestamp'
+
+kubectl apply -f demo-NAP/inflate-default-1000mCPU.yaml
+kubectl scale deployment.apps/inflate-default-1000mcpu --replicas 5
+
+kubectl apply -f demo-NAP/inflate-spot-250mCPU.yaml 
+kubectl scale deployment.apps/inflate-spot-250mcpu --replicas 10
+
+kubectl apply -f demo-NAP/inflate-spot-500mCPU.yaml 
+kubectl scale deployment.apps/inflate-spot-500mcpu --replicas 12
+
+kubectl get nodeclaims {node_claim} -o yaml | grep ^status -A10
+
+kubectl scale deployment.apps/inflate-default-1000mcpu --replicas 2
+kubectl scale deployment.apps/inflate-spot-250mcpu --replicas 3
+kubectl scale deployment.apps/inflate-spot-500mcpu --replicas 6
+
+# kubectl apply -f demo-NAP/nodeclass-64G-202309290.yaml
+kubectl apply -f demo-NAP/nodepool-64G-spot-D-202309290.yaml
+kubectl get events -A --field-selector source=karpenter --sort-by='.metadata.creationTimestamp'
+
+kubectl get nodepools
+
+kubectl apply -f demo-NAP/nodeclass-256G-202401220.yaml
+kubectl apply -f demo-NAP/nodepool-256G-spot-B-202401220.yaml
+
+kubectl get nodepools
+
+kubectl apply -f demo-NAP/inflate-spot-250mcpu-no-disrupt.yaml
+
+# Cleanup #
+
+# kubectl delete -f demo-NAP/nodepool-64G-spot-D-202309290.yaml
+# kubectl delete -f demo-NAP/nodepool-256G-spot-B-202401220.yaml
+
+# kubectl delete -f demo-NAP/nodeclass-256G-202401220.yaml
+# kubectl delete -f demo-NAP/nodeclass-64G-202309290.yaml
+
+# kubectl delete -f demo-NAP/inflate-default-1000mCPU.yaml
+# kubectl delete -f demo-NAP/inflate-spot-250mCPU.yaml
+# kubectl delete -f demo-NAP/inflate-spot-500mCPU.yaml 

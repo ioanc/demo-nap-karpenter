@@ -1,0 +1,7 @@
+apiVersion: karpenter.azure.com/v1alpha2
+kind: AKSNodeClass
+metadata:
+  name: node-256g-202401220
+spec:
+  imageVersion: 202401.22.0
+  osDiskSizeGB: 256
