@@ -1,110 +1,124 @@
-# check initial nodes on the AKS cluster
+## check initial nodes on the AKS cluster
 
 kubectl get nodes
 
-# check the CRD related to NAP / karpenter
+## check the CRD related to NAP / karpenter
 
 kubectl get crd | grep karpenter
 
-# check the actual instances of the CRDs
+## check the actual instances of the CRDs
 
 kubectl get aksnodeclasses
 kubectl get nodepools
 kubectl get nodeclaims
 
-# check the evenst related to NAP / karpenter 
+## check the evenst related to NAP / karpenter 
 
 kubectl get events -A --field-selector source=karpenter --sort-by='.metadata.creationTimestamp'
 
-# create a deployment that requests 1000m CPU and sclae it to 20 relicas
+## create a deployment that requests 1000m CPU and scale it to 20 relicas
 
 kubectl apply -f demo-NAP/inflate-default-1000mCPU.yaml
 kubectl scale deployment.apps/inflate-default-1000mcpu --replicas 20
 
-# check the evenst related to NAP / karpenter
+## check the evenst related to NAP / karpenter
 
 kubectl get events -A --field-selector source=karpenter --sort-by='.metadata.creationTimestamp'
 
-# create a deployment that requests 250m CPU and sclae it to 10 relicas
-# deployment configured to be able to run on Spot nodes
+## create a deployment that requests 250m CPU and scale it to 10 relicas
+## deployment configured to be able to run on Spot nodes
 
 kubectl apply -f demo-NAP/inflate-spot-250mCPU.yaml 
 kubectl scale deployment.apps/inflate-spot-250mcpu --replicas 10
 
-# create a deployment that requests 500m CPU and sclae it to 10 relicas
-# deployment configured to be able to run on Spot nodes
+## create a deployment that requests 500m CPU and scale it to 10 relicas
+## deployment configured to be able to run on Spot nodes
 
 kubectl apply -f demo-NAP/inflate-spot-500mCPU.yaml 
 kubectl scale deployment.apps/inflate-spot-500mcpu --replicas 12
 
-# check the evenst related to NAP / karpenter 
+## check the evenst related to NAP / karpenter 
 
 kubectl get events -A --field-selector source=karpenter --sort-by='.metadata.creationTimestamp'
 
-# check the created nodeclaims and look at the resources
+## check the created nodeclaims and look at the resources
 
 kubectl get node_claim
 kubectl get nodeclaims {node_claim} -o yaml | grep ^status -A10
 
-# check the nodes and how the pods are scheduled
+## check the nodes and how the pods are scheduled
 
 kubectl get nodes
 kubectl get pods -o wide
 
-# scale deployments to a small number of replicas
-# check the nodes and observe that some might got removed 
-# check how some of the pods have been removed and created on new nodes
+## scale deployments to a small number of replicas
+## check the nodes and observe that some might got removed 
+## check how some of the pods have been removed and created on new nodes
 
-kubectl scale deployment.apps/inflate-default-1000mcpu --replicas 2
-kubectl scale deployment.apps/inflate-spot-250mcpu --replicas 3
-kubectl scale deployment.apps/inflate-spot-500mcpu --replicas 6
+kubectl scale deployment.apps/inflate-default-1000mcpu --replicas 1
+kubectl scale deployment.apps/inflate-spot-250mcpu --replicas 1
+kubectl scale deployment.apps/inflate-spot-500mcpu --replicas 1
 
-# create a new nodepool
+## create a new nodepool
 
 kubectl apply -f demo-NAP/nodepool-64G-spot-D-202309290.yaml
 
-# check the envents about the new created node pool
+## check the envents about the new created node pool
 
 kubectl get events -A --field-selector source=karpenter --sort-by='.metadata.creationTimestamp'
 
-# create the AKSnodeclass for the previous nodepool
-# check the node image and diskspace as soon as a such node will be created
+## create the AKSnodeclass for the previous nodepool
+## check the node image and diskspace as soon as a such node will be created
 
 kubectl apply -f demo-NAP/nodeclass-64G-202309290.yaml
 
-# create a new aksnodeclass and nodepool it is using it
+## create a new aksnodeclass the nodepool that is using the aksnodeclass
 
 kubectl apply -f demo-NAP/nodeclass-256G-202401220.yaml
 kubectl apply -f demo-NAP/nodepool-256G-spot-B-202401220.yaml
 
-# check the nodepools
+## check the nodepools
 
 kubectl get nodepools
 
-# create a new deployment, that cannot be disrupted by NAP / karpenter and scale it
-# check the annotation
+## scale deployments up and check the new nodes and names matching the nodepool we created earlier
+
+kubectl scale deployment.apps/inflate-default-1000mcpu --replicas 6
+kubectl scale deployment.apps/inflate-spot-250mcpu --replicas 8
+kubectl scale deployment.apps/inflate-spot-500mcpu --replicas 7
+
+## check the new created nodeclaims using the new nodepool look at the resources
+
+kubectl get node_claim
+kubectl get nodeclaims {node_claim} -o yaml | grep ^status -A10
+
+## create a new deployment, that cannot be disrupted by karpenter and scale it
+## check the annotation
 
 kubectl apply -f demo-NAP/inflate-spot-250mcpu-no-disrupt.yaml
 kubectl scale deployment.apps/inflate-spot-250mcpu-no-disrupt --replicas 2
 
-# scale to 0 the other deployment and observe that some nodes are not removed
+## scale to 0 the other deployment and observe that some nodes are not removed
 
 kubectl scale deployment.apps/inflate-default-1000mcpu --replicas 2
 kubectl scale deployment.apps/inflate-spot-250mcpu --replicas 3
 kubectl scale deployment.apps/inflate-spot-500mcpu --replicas 6
 
-# check the envents about the nodes and why nodeclaim cannot be disrupted
+## check the envents about the nodes and why nodeclaim cannot be disrupted
 
 kubectl get events -A --field-selector source=karpenter --sort-by='.metadata.creationTimestamp'
 
+## clean up the workload and karpenter will delete the nodes
 
+# kubectl apply -f demo-NAP/inflate-spot-250mCPU.yaml
+# kubectl apply -f demo-NAP/inflate-spot-500mCPU.yaml
+# kubectl apply -f demo-NAP/inflate-default-1000mCPU.yaml
+# kubectl apply -f demo-NAP/inflate-spot-250mcpu-no-disrupt.yaml
+
+## remove the manual added nodepools and aksnodeclasses
 
 # kubectl delete -f demo-NAP/nodepool-64G-spot-D-202309290.yaml
 # kubectl delete -f demo-NAP/nodepool-256G-spot-B-202401220.yaml
 
 # kubectl delete -f demo-NAP/nodeclass-256G-202401220.yaml
 # kubectl delete -f demo-NAP/nodeclass-64G-202309290.yaml
-
-# kubectl delete -f demo-NAP/inflate-default-1000mCPU.yaml
-# kubectl delete -f demo-NAP/inflate-spot-250mCPU.yaml
-# kubectl delete -f demo-NAP/inflate-spot-500mCPU.yaml 
