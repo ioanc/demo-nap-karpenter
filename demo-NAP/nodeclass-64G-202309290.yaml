@@ -4,4 +4,4 @@ metadata:
   name: node-64g-202309290
 spec:
   imageVersion: 202309.29.0
-  osDiskSizeGB: 102
+  osDiskSizeGB: 100
