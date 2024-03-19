@@ -1,5 +1,5 @@
-## To view the actual nodes load, please use the tool eks-node-viewer.
-## It can be donloaded from https://github.com/awslabs/eks-node-viewer
+## To view the actual nodes resource requests total, please use the tool eks-node-viewer.
+## It can be downloaded from https://github.com/awslabs/eks-node-viewer
 
 ## Start the eks-node-viewer using the enxt syntax to display only NAP / karpenter added nodes
 ./eks-node-viewer --node-selector karpenter.sh/nodepool --disable-pricing --resources cpu
